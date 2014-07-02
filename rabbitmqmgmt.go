@@ -6,14 +6,12 @@ import (
 	"os"
 )
 
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "rabbitmqmgmt"
-	app.Usage = "queue "
-	app.Action = func(c *cli.Context) {
-		println("testing!")
-	}
-
+  app.Usage = "rabbitmq queue/exchage/bindings management"
+	
 	app.Commands = []cli.Command{
 		{
 			Name:      "queue",
@@ -38,14 +36,19 @@ func main() {
 		},
     {
       Name:      "exchange",
-      ShortName: "q",
+      ShortName: "e",
       Usage:     "options for queues",
       Subcommands: []cli.Command{
         {
           Name:  "add",
           Usage: "add a new exchange",
+          Flags: []cli.Flag {
+            cli.StringFlag{"type", "direct", "exchange type (direct|fanout|topic|Header)"},
+            cli.BoolFlag{"durable", "exchanges survive broker restart"},
+            cli.BoolFlag{"auto-delete", "exchange is deleted when all queues have finished using it"},
+          },
           Action: func(c *cli.Context) {
-            println("new exchange: ", c.Args().First())
+            println("new exchange: ", c.Args().First(), c.String("type"), "durable", c.Bool("durable"), "auto-delete", c.Bool("auto-delete"))
           },
         },
         {
