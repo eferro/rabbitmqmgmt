@@ -3,8 +3,17 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
+	"github.com/streadway/amqp"
 	"os"
 )
+
+func queue_create(amqp_uri string, name string, durable bool, auto_delete bool) {
+	println("queue create: ", name, durable, auto_delete)
+}
+
+func queue_remove(name string) {
+	println("queue remove: ", name)
+}
 
 func main() {
 	app := cli.NewApp()
@@ -25,14 +34,14 @@ func main() {
 						cli.BoolFlag{"auto-delete", "queue is deleted when last consumer unsubscribes"},
 					},
 					Action: func(c *cli.Context) {
-						println("new queue: ", c.Args().First(), "durable", c.Bool("durable"), "auto-delete", c.Bool("auto-delete"))
+						queue_create("amqp://guest:guest@localhost:5672/", c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"))
 					},
 				},
 				{
 					Name:  "remove",
 					Usage: "remove an existing queue",
 					Action: func(c *cli.Context) {
-						println("removed queue: ", c.Args().First())
+						queue_remove(c.Args().First())
 					},
 				},
 			},
