@@ -9,6 +9,13 @@ import (
 
 func queue_create(amqp_uri string, name string, durable bool, auto_delete bool) {
 	println("queue create: ", name, durable, auto_delete)
+
+	_, err := amqp.Dial(amqp_uri)
+	if err != nil {
+		println("Dial: ", err)
+	}
+
+
 }
 
 func queue_remove(name string) {
