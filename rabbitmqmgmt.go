@@ -17,8 +17,6 @@ func failOnError(err error, msg string) {
 }
 
 func queue_create(amqp_uri string, queue_name string, durable bool, auto_delete bool) {
-	println("queue create: ", queue_name, durable, auto_delete)
-
 	conn, err := amqp.Dial(amqp_uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
