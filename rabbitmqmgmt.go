@@ -72,6 +72,23 @@ func queue_bind(amqp_uri string, queue_name string, exchange_name string, routin
 	failOnError(err, "Failed to bind the queue to the exchange")
 }
 
+func queue_unbind(amqp_uri string, queue_name string, exchange_name string, routing_key string) {
+	conn, err := amqp.Dial(amqp_uri)
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	err = ch.QueueUnbind(
+		queue_name,
+		routing_key,
+		exchange_name,
+		nil) // args
+	failOnError(err, "Failed to bind the queue to the exchange")
+}
+
 func exchange_create(amqp_uri string, queue_name string, exchange_type string, durable bool, auto_delete bool) {
 	conn, err := amqp.Dial(amqp_uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -130,6 +147,13 @@ func main() {
 			},
 		},
 		{
+			Name:  "queue_remove",
+			Usage: "remove an existing queue",
+			Action: func(c *cli.Context) {
+				queue_remove(c.GlobalString("amqp_uri"), c.Args().First())
+			},
+		},
+		{
 			Name:  "queue_bind",
 			Usage: "bind a queue to a exchange using a ginven topic/routing key",
 			Action: func(c *cli.Context) {
@@ -142,10 +166,15 @@ func main() {
 			},
 		},
 		{
-			Name:  "queue_remove",
-			Usage: "remove an existing queue",
+			Name:  "queue_unbind",
+			Usage: "remove an existing binding",
 			Action: func(c *cli.Context) {
-				queue_remove(c.GlobalString("amqp_uri"), c.Args().First())
+				queue_unbind(
+					c.GlobalString("amqp_uri"),
+					c.Args().Get(0), // queue_name
+					c.Args().Get(1), // exchange_name
+					c.Args().Get(2), // routing_key/topic
+				)
 			},
 		},
 		{
