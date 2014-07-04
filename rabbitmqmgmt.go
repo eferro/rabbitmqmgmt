@@ -92,64 +92,52 @@ func exchange_remove(amqp_uri string, exchange_name string) {
 }
 
 func main() {
-	amqp_uri := "amqp://guest:guest@localhost:5672/"
-
 	app := cli.NewApp()
 	app.Name = "rabbitmqmgmt"
 	app.Usage = "rabbitmq queue/exchage/bindings management"
+	app.Flags = []cli.Flag{
+		cli.StringFlag{"amqp_uri, u", "amqp://guest:guest@localhost:5672/", "broker url (including vhost)"},
+	}
 
 	app.Commands = []cli.Command{
 		{
-			Name:      "queue",
-			ShortName: "q",
-			Usage:     "options for queues",
-			Subcommands: []cli.Command{
-				{
-					Name:  "add",
-					Usage: "add a new queue",
-					Flags: []cli.Flag{
-						cli.BoolFlag{"durable", "queue survive broker restart"},
-						cli.BoolFlag{"auto-delete", "queue is deleted when last consumer unsubscribes"},
-					},
-					Action: func(c *cli.Context) {
-						queue_create(amqp_uri, c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"))
-					},
-				},
-				{
-					Name:  "remove",
-					Usage: "remove an existing queue",
-					Action: func(c *cli.Context) {
-						queue_remove(amqp_uri, c.Args().First())
-					},
-				},
+			Name:  "queue_add",
+			Usage: "add a new queue",
+			Flags: []cli.Flag{
+				cli.BoolFlag{"durable", "queue survive broker restart"},
+				cli.BoolFlag{"auto-delete", "queue is deleted when last consumer unsubscribes"},
+			},
+			Action: func(c *cli.Context) {
+				queue_create(c.GlobalString("amqp_uri"), c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"))
 			},
 		},
 		{
-			Name:      "exchange",
-			ShortName: "e",
-			Usage:     "options for exchanges",
-			Subcommands: []cli.Command{
-				{
-					Name:  "add",
-					Usage: "add a new exchange",
-					Flags: []cli.Flag{
-						cli.StringFlag{"type", "direct", "exchange type (direct|fanout|topic|Header)"},
-						cli.BoolFlag{"durable", "exchanges survive broker restart"},
-						cli.BoolFlag{"auto-delete", "exchange is deleted when all queues have finished using it"},
-					},
-					Action: func(c *cli.Context) {
-						exchange_create(amqp_uri, c.Args().First(), c.String("type"), c.Bool("durable"), c.Bool("auto-delete"))
-					},
-				},
-				{
-					Name:  "remove",
-					Usage: "remove an existing exchange",
-					Action: func(c *cli.Context) {
-						exchange_remove(amqp_uri, c.Args().First())
-					},
-				},
+			Name:  "queue_remove",
+			Usage: "remove an existing queue",
+			Action: func(c *cli.Context) {
+				queue_remove(c.GlobalString("amqp_uri"), c.Args().First())
+			},
+		},
+		{
+			Name:  "exchange_add",
+			Usage: "add a new exchange",
+			Flags: []cli.Flag{
+				cli.StringFlag{"type", "direct", "exchange type (direct|fanout|topic|Header)"},
+				cli.BoolFlag{"durable", "exchanges survive broker restart"},
+				cli.BoolFlag{"auto-delete", "exchange is deleted when all queues have finished using it"},
+			},
+			Action: func(c *cli.Context) {
+				exchange_create(c.GlobalString("amqp_uri"), c.Args().First(), c.String("type"), c.Bool("durable"), c.Bool("auto-delete"))
+			},
+		},
+		{
+			Name:  "exchange_remove",
+			Usage: "remove an existing exchange",
+			Action: func(c *cli.Context) {
+				exchange_remove(c.GlobalString("amqp_uri"), c.Args().First())
 			},
 		},
 	}
+
 	app.Run(os.Args)
 }
