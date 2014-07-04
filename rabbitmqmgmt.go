@@ -2,19 +2,40 @@
 package main
 
 import (
+	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/streadway/amqp"
+	"log"
 	"os"
 )
 
-func queue_create(amqp_uri string, name string, durable bool, auto_delete bool) {
-	println("queue create: ", name, durable, auto_delete)
-
-	_, err := amqp.Dial(amqp_uri)
+func failOnError(err error, msg string) {
 	if err != nil {
-		println("Dial: ", err)
+		log.Fatalf("%s: %s", msg, err)
+		panic(fmt.Sprintf("%s: %s", msg, err))
 	}
+}
 
+func queue_create(amqp_uri string, queue_name string, durable bool, auto_delete bool) {
+	println("queue create: ", queue_name, durable, auto_delete)
+
+	conn, err := amqp.Dial(amqp_uri)
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	_, err = ch.QueueDeclare(
+		queue_name,
+		durable,
+		auto_delete,
+		false,
+		false,
+		nil,
+	)
+	failOnError(err, "Failed to declare a queue")
 
 }
 
