@@ -37,11 +37,26 @@ func queue_create(amqp_uri string, queue_name string, durable bool, auto_delete 
 
 }
 
-func queue_remove(name string) {
-	println("queue remove: ", name)
+func queue_remove(amqp_uri string, queue_name string) {
+	conn, err := amqp.Dial(amqp_uri)
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	_, err = ch.QueueDelete(
+		queue_name,
+		false,	// ifUnused
+		false,  // ifEmpty
+		false)   // noWait
+	failOnError(err, "Failed to declare a queue")
 }
 
 func main() {
+	amqp_uri := "amqp://guest:guest@localhost:5672/"
+
 	app := cli.NewApp()
 	app.Name = "rabbitmqmgmt"
 	app.Usage = "rabbitmq queue/exchage/bindings management"
@@ -60,14 +75,14 @@ func main() {
 						cli.BoolFlag{"auto-delete", "queue is deleted when last consumer unsubscribes"},
 					},
 					Action: func(c *cli.Context) {
-						queue_create("amqp://guest:guest@localhost:5672/", c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"))
+						queue_create(amqp_uri, c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"))
 					},
 				},
 				{
 					Name:  "remove",
 					Usage: "remove an existing queue",
 					Action: func(c *cli.Context) {
-						queue_remove(c.Args().First())
+						queue_remove(amqp_uri, c.Args().First())
 					},
 				},
 			},
