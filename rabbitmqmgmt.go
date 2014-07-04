@@ -54,6 +54,24 @@ func queue_remove(amqp_uri string, queue_name string) {
 	failOnError(err, "Failed to remove a queue")
 }
 
+func queue_bind(amqp_uri string, queue_name string, exchange_name string, routing_key string) {
+	conn, err := amqp.Dial(amqp_uri)
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	err = ch.QueueBind(
+		queue_name,
+		routing_key,
+		exchange_name,
+		false, // noWait
+		nil)   // args
+	failOnError(err, "Failed to bind the queue to the exchange")
+}
+
 func exchange_create(amqp_uri string, queue_name string, exchange_type string, durable bool, auto_delete bool) {
 	conn, err := amqp.Dial(amqp_uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -109,6 +127,18 @@ func main() {
 			},
 			Action: func(c *cli.Context) {
 				queue_create(c.GlobalString("amqp_uri"), c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"))
+			},
+		},
+		{
+			Name:  "queue_bind",
+			Usage: "bind a queue to a exchange using a ginven topic/routing key",
+			Action: func(c *cli.Context) {
+				queue_bind(
+					c.GlobalString("amqp_uri"),
+					c.Args().Get(0), // queue_name
+					c.Args().Get(1), // exchange_name
+					c.Args().Get(2), // routing_key/topic
+				)
 			},
 		},
 		{
