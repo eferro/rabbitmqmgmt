@@ -9,6 +9,19 @@ import (
 	"os"
 )
 
+const (
+	VERSION = "0.0.1"
+	ERROR   = -1
+)
+
+func validateArgsNumber(c *cli.Context, argsNumber int, msg string) {
+	argc := len(c.Args())
+	if argc != argsNumber {
+		fmt.Println(msg)
+		os.Exit(ERROR)
+	}
+}
+
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
@@ -130,6 +143,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "rabbitmqmgmt"
 	app.Usage = "rabbitmq queue/exchage/bindings management"
+	app.Version = VERSION
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"amqp_uri, u", "amqp://guest:guest@localhost:5672/", "broker url (including vhost)"},
 	}
@@ -143,6 +157,7 @@ func main() {
 				cli.BoolFlag{"auto-delete", "queue is deleted when last consumer unsubscribes"},
 			},
 			Action: func(c *cli.Context) {
+				validateArgsNumber(c, 1, "Usage: queue_add queue_name")
 				queue_create(c.GlobalString("amqp_uri"), c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"))
 			},
 		},
@@ -150,6 +165,7 @@ func main() {
 			Name:  "queue_remove",
 			Usage: "remove an existing queue",
 			Action: func(c *cli.Context) {
+				validateArgsNumber(c, 1, "Usage: queue_remove queue_name")
 				queue_remove(c.GlobalString("amqp_uri"), c.Args().First())
 			},
 		},
@@ -157,6 +173,7 @@ func main() {
 			Name:  "queue_bind",
 			Usage: "bind a queue to a exchange using a ginven topic/routing key",
 			Action: func(c *cli.Context) {
+				validateArgsNumber(c, 3, "Usage: queue_bind queue exchange routing_key")
 				queue_bind(
 					c.GlobalString("amqp_uri"),
 					c.Args().Get(0), // queue_name
@@ -169,6 +186,7 @@ func main() {
 			Name:  "queue_unbind",
 			Usage: "remove an existing binding",
 			Action: func(c *cli.Context) {
+				validateArgsNumber(c, 3, "Usage: queue_unbind queue exchange routing_key")
 				queue_unbind(
 					c.GlobalString("amqp_uri"),
 					c.Args().Get(0), // queue_name
@@ -186,6 +204,7 @@ func main() {
 				cli.BoolFlag{"auto-delete", "exchange is deleted when all queues have finished using it"},
 			},
 			Action: func(c *cli.Context) {
+				validateArgsNumber(c, 1, "Usage: exchange_add exchange_name")
 				exchange_create(c.GlobalString("amqp_uri"), c.Args().First(), c.String("type"), c.Bool("durable"), c.Bool("auto-delete"))
 			},
 		},
@@ -193,6 +212,7 @@ func main() {
 			Name:  "exchange_remove",
 			Usage: "remove an existing exchange",
 			Action: func(c *cli.Context) {
+				validateArgsNumber(c, 1, "Usage: exchange_remove exchange_name")
 				exchange_remove(c.GlobalString("amqp_uri"), c.Args().First())
 			},
 		},
