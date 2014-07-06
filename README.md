@@ -3,22 +3,18 @@ rabbitmqmgmt
 cli tool for rabbitmq queue/exchage/bindings management.
 rabbitmqctl equivalent for create/delete/bind queues, exchanges, etc.
 
-
 Subcommands
 ===========
-   queue_add      add a new queue
-   queue_remove      remove an existing queue
-   queue_bind     bind a queue to a exchange using a ginven topic/routing key
-   queue_unbind      remove an existing binding
-   exchange_add      add a new exchange
-   exchange_remove   remove an existing exchange
-   help, h     Shows a list of commands or help for one command
-
+ * **queue_add** add a new queue
+ * **queue_remove** remove an existing queue
+ * **queue_bind** bind a queue to a exchange using a ginven topic/routing key
+ * **queue_unbind** remove an existing binding
+ * **exchange_add** add a new exchange
+ * **exchange_remove** remove an existing exchange
+ 
 Global options
 ==============
    --amqp_uri, -u 'amqp://guest:guest@localhost:5672/'   broker url (including vhost)
-   --version, -v              print the version
-   --help, -h                 show help
 
 
 Examples:
