@@ -30,18 +30,28 @@ rabbitmqmgmt queue_add --durable --x-message-ttl 5000 test_queue
 ```
 
 Create durable topic exchange named test_exchange
-```rabbitmqmgmt exchange_add --type topic --durable test_exchange```
+```
+rabbitmqmgmt exchange_add --type topic --durable test_exchange
+```
 
 
 Bind the test_queue to the test_exchange for all the topics starting with 'error'
-```rabbitmqmgmt queue_bind test_queue test_exchange 'error.#'```
+```
+rabbitmqmgmt queue_bind test_queue test_exchange 'error.#'
+```
 
 Unbind the previus binding
-```rabbitmqmgmt queue_unbind test_queue test_exchange 'error.#'```
+```
+rabbitmqmgmt queue_unbind test_queue test_exchange 'error.#'
+```
 
 Remove the test_queue
-```rabbitmqmgmt queue_remove test_queue```
+```
+rabbitmqmgmt queue_remove test_queue
+```
 
 Remove the test_exchange
-```rabbitmqmgmt exchange_remove test_exchange```
+```
+rabbitmqmgmt exchange_remove test_exchange
+```
 
