@@ -29,7 +29,7 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func queue_create(amqp_uri string, queue_name string, durable bool, auto_delete bool) {
+func queue_create(amqp_uri string, queue_name string, durable bool, auto_delete bool, messageTtl int32) {
 	conn, err := amqp.Dial(amqp_uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -38,13 +38,18 @@ func queue_create(amqp_uri string, queue_name string, durable bool, auto_delete 
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
+	args := amqp.Table{}
+	if messageTtl > 0 {
+		args["x-message-ttl"] = messageTtl
+	}
+
 	_, err = ch.QueueDeclare(
 		queue_name,
 		durable,
 		auto_delete,
 		false,
 		false,
-		nil,
+		args,
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -155,10 +160,12 @@ func main() {
 			Flags: []cli.Flag{
 				cli.BoolFlag{"durable", "queue survive broker restart"},
 				cli.BoolFlag{"auto-delete", "queue is deleted when last consumer unsubscribes"},
+				cli.IntFlag{"x-message-ttl", 0, "per-queue message TTL (ms) (0 for no ttl)"},
 			},
 			Action: func(c *cli.Context) {
 				validateArgsNumber(c, 1, "Usage: queue_add queue_name")
-				queue_create(c.GlobalString("amqp_uri"), c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"))
+				messageTtl := int32(c.Int("x-message-ttl"))
+				queue_create(c.GlobalString("amqp_uri"), c.Args().First(), c.Bool("durable"), c.Bool("auto-delete"), messageTtl)
 			},
 		},
 		{
