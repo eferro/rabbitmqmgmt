@@ -148,6 +148,8 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "rabbitmqmgmt"
 	app.Usage = "rabbitmq queue/exchage/bindings management"
+	app.Author = "Eduardo Ferro Aldama"
+	app.Email = "eduardo.ferro.aldama@gmail.com"
 	app.Version = VERSION
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"amqp_uri, u", "amqp://guest:guest@localhost:5672/", "broker url (including vhost)"},
