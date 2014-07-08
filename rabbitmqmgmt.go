@@ -1,4 +1,3 @@
-/* greet.go */
 package main
 
 import (
